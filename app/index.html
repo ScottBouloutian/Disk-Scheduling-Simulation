@@ -1,37 +1,75 @@
 <!doctype html>
 <html>
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>Disk Scheduling Simulation</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
 
-        <!-- build:css styles/main.css -->
-        <link rel="stylesheet" href="styles/normalize.css">
-        <link rel="stylesheet" href="styles/style.css">
-        <!-- endbuild -->
+    <!-- build:css styles/main.css -->
+    <link rel="stylesheet" href="styles/normalize.css">
+    <link rel="stylesheet" href="styles/style.css">
+    <!-- endbuild -->
+
+    <link rel="stylesheet" href="bower_components/flat-ui/dist/css/flat-ui.css">
 </head>
-  <body>
 
-        <!-- build:js(app) scripts/bower_components.js -->
-        <script src="bower_components/jquery/jquery.js"></script>
-        <!-- endbuild -->
+<body>
 
-        <!-- build:js scripts/crafty.js -->
-        <script src="libs/Crafty/crafty.js"></script>
-        <!-- endbuild -->
+    <!-- build:js(app) scripts/bower_components.js -->
+    <script src="bower_components/jquery/jquery.js"></script>
+    <!-- endbuild -->
 
-        <!-- build:js scripts/crafty_debug.js -->
-        <script src="libs/CraftyDebug/craftyDebug.js"></script>
-        <script src="libs/CraftyDebug/panels/assets.js"></script>
-        <script src="libs/CraftyDebug/panels/entities.js"></script>
-        <!-- endbuild -->
+    <!-- build:js scripts/crafty.js -->
+    <script src="libs/Crafty/crafty.js"></script>
+    <!-- endbuild -->
 
-        <!-- build:js(.tmp) scripts/combined-scripts.js -->
-        <script src="scripts/combined-scripts.js"></script>
-        <!-- endbuild -->
+    <!-- build:js scripts/crafty_debug.js -->
+    <script src="libs/CraftyDebug/craftyDebug.js"></script>
+    <script src="libs/CraftyDebug/panels/assets.js"></script>
+    <script src="libs/CraftyDebug/panels/entities.js"></script>
+    <!-- endbuild -->
 
-        <h1>Disk Scheduling Simulation</h1>
+    <!-- build:js(.tmp) scripts/combined-scripts.js -->
+    <script src="scripts/combined-scripts.js"></script>
+    <!-- endbuild -->
+
+    <h1>Disk Scheduling Simulation</h1>
+    <p>Welcome to the disk scheduling simulator!</p>
+    <div id="simulator">
+        <div id=queue-controls class="input_segment">
+            <h5>Disk Queue</h5>
+            <textarea id="queue-text" rows="4" cols="50" placeholder="disk queue" class="form-control">95, 180, 34, 119, 11, 123, 62, 64</textarea>
+        </div>
+        <div id="algor-controls" class="input_segment">
+            <h5>Scheduling Algorithm</h5>
+            <div id="algor-radio"></div>
+            <script>
+                var radioLabels = ['First Come-First Serve (FCFS)', 'Shortest Seek Time First (SSTF)', 'Elevator (SCAN)', 'Circular SCAN (C-SCAN)', 'LOOK', 'C-LOOK'];
+                radioLabels.forEach(function(label, index) {
+                    console.log(label);
+                    var radioId = 'radio' + (index + 1);
+                    var inputParams = '';
+                    if(index===0) {
+                        inputParams = inputParams + 'checked="checked"';
+                    }
+                    var radioHtml = '<label class="radio" for="' + radioId + '"><input type="radio" name="algor" value="" id="' + radioId +
+                        '" data-toggle="radio" class="custom-radio"' + inputParams + '></input><span class="icons"><span class="icon-unchecked"></span><span class="icon-checked"></span></span>' + label + '</label>';
+                    var radioFragment = document.createElement('div');
+                    radioFragment.innerHTML = radioHtml;
+                    var element = document.getElementById('algor-radio');
+                    element.appendChild(radioFragment);
+                });
+            </script>
+        </div>
+        <div id="options-controls" class="input_segment">
+            <h5>Options</h5>
+            <p>No additional options for now</p>
+        </div>
+        <button id="run_sim-btn" class="btn btn-hg btn-primary">Run Simulation</button>
+    </div>
 </body>
+
 </html>
