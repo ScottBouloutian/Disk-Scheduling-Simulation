@@ -54,10 +54,10 @@ function runSimulation() {
             result = fcfs(queue);
             break;
         case 1:
-            result = fcfs(queue);
+            result = sstf(queue, initialTrack);
             break;
         case 2:
-            result = fcfs(queue);
+            result = scan(queue);
             break;
         case 3:
             result = fcfs(queue);
@@ -101,8 +101,51 @@ function parseQueueText(tailTrack) {
     return queue;
 }
 
+// First Come-First Serve
 function fcfs(queue) {
     return queue;
+}
+
+// Shortest Seek Time First
+function sstf(queue, initialTrack) {
+    var result = [];
+    var currentTrack = initialTrack;
+    for(var j = 0;j<8;j++) {
+        var min = {
+            track: queue[0],
+            index: 0
+        }
+        for(var i=1;i<queue.length;i++) {
+            if(Math.abs(queue[i]-currentTrack) < Math.abs(min.track-currentTrack)) {
+                min.track = queue[i];
+                min.index = i;
+            }
+        }
+        result.push(min.track);
+        currentTrack = min.track;
+        queue.splice(min.index,1);
+    }
+    return result;
+}
+
+// Elevator
+function scan(queue, initialTrack) {
+
+}
+
+// Circular SCAN
+function cscan() {
+
+}
+
+// LOOK
+function look() {
+
+}
+
+// C-LOOK
+function clook() {
+
 }
 
 function simulate(trackNumbers, initialTrack, maxTrack, callback) {
