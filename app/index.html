@@ -37,11 +37,12 @@
     <!-- endbuild -->
 
     <h1>Disk Scheduling Simulation</h1>
-    <p>Welcome to the disk scheduling simulator!</p>
     <div id="simulator">
+        <p>By Scott Bouloutian</p>
+        <p>Welcome!</p>
         <div id=queue-controls class="input_segment">
             <h5>Disk Queue</h5>
-            <textarea id="queue-text" rows="4" cols="50" placeholder="disk queue" class="form-control">95, 180, 34, 119, 11, 123, 62, 64</textarea>
+            <textarea id="queue-text" rows="5" cols="50" placeholder="disk queue" class="form-control">95, 180, 34, 119, 11, 123, 62, 64</textarea>
         </div>
         <div id="algor-controls" class="input_segment">
             <h5>Scheduling Algorithm</h5>
@@ -49,13 +50,13 @@
             <script>
                 var radioLabels = ['First Come-First Serve (FCFS)', 'Shortest Seek Time First (SSTF)', 'Elevator (SCAN)', 'Circular SCAN (C-SCAN)', 'LOOK', 'C-LOOK'];
                 radioLabels.forEach(function(label, index) {
-                    console.log(label);
                     var radioId = 'radio' + (index + 1);
+                    var radioValue = '"' + index + '"';
                     var inputParams = '';
                     if(index===0) {
                         inputParams = inputParams + 'checked="checked"';
                     }
-                    var radioHtml = '<label class="radio" for="' + radioId + '"><input type="radio" name="algor" value="" id="' + radioId +
+                    var radioHtml = '<label class="radio" for="' + radioId + '"><input type="radio" name="algor" value=' + radioValue + ' id="' + radioId +
                         '" data-toggle="radio" class="custom-radio"' + inputParams + '></input><span class="icons"><span class="icon-unchecked"></span><span class="icon-checked"></span></span>' + label + '</label>';
                     var radioFragment = document.createElement('div');
                     radioFragment.innerHTML = radioHtml;
@@ -66,9 +67,24 @@
         </div>
         <div id="options-controls" class="input_segment">
             <h5>Options</h5>
-            <p>No additional options for now</p>
+            <p>Initial Track</p>
+            <input id="init_track-text" type="text" placeholder="50" class="form-control" value="50"></input>
+            <p>Tail Track</p>
+            <input id="tail_track-text" type="text" placeholder="199" class="form-control" value="199"></input>
         </div>
         <button id="run_sim-btn" class="btn btn-hg btn-primary">Run Simulation</button>
+        <div id="results-controls">
+            <h5>Simulation Results</h5>
+            <textarea id="results-text" rows="5" cols="50" placeholder="Running..." class="form-control"></textarea>
+            <div id="running_sim">
+                <div id="output_stats">
+                    <p id="current-text">Current Track:</p>
+                    <p id="next-text">Next Track:</p>
+                    <p id="total-text">Head Movements:</p>
+                </div>
+                <div id=game></div>
+            </div>
+        </div>
     </div>
 </body>
 

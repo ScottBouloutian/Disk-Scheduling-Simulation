@@ -1,5 +1,5 @@
 Crafty.scene('Main', function() {
-    Crafty.background('#000000');
+    Crafty.background('#FFFFFF');
     Crafty.sprite(350, "images/disk.png", {
         disk: [0, 0]
     });
@@ -13,8 +13,9 @@ Crafty.scene('Main', function() {
             w: 200,
             h: 200
         });
+        disk.origin(100,100);
     var armSize = 150;
-    var arm = Crafty.e("2D, Canvas, arm")
+    var arm = Crafty.e("2D, Canvas, arm, Tween")
         .attr({
             x: 75,
             y: 100,
@@ -22,7 +23,6 @@ Crafty.scene('Main', function() {
             h: armSize
         });
     arm.origin(364*armSize/424, 206*armSize/424);
-    arm.rotation = 15;
 }, function() {
     // destructor
 });

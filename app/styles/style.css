@@ -5,17 +5,43 @@ html, body {
 
 #simulator {
     position: relative;
-    height: 900px;
+    height: 1000px;
     width: 300px;
+    margin-left: 30px;
+}
+
+.input_segment {
+    width: 300px;
+}
+
+#options-controls .form-control {
+    width: 30px;
+    height: 20px;
+}
+
+#results-controls {
+    position: absolute;
+    bottom: 100px;
+    visibility: hidden;
+    width: 500px;
+}
+
+#results-text {
+    resize: none;
+    height: 200px;
+}
+
+#running_sim {
+    position: relative;
+}
+
+#output_stats {
+    float: left;
+    width: 250px;
 }
 
 #game {
     float: right;
     height: 250px;
     width: 250px;
-}
-
-.input_segment {
-    display: inline-block;
-    width: 300px;
 }
