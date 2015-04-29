@@ -11,7 +11,50 @@ html, body {
 }
 
 .input_segment {
+    width: 600px;
+}
+
+#queue-controls textarea{
+    max-width: 550px;
+}
+
+#controls {
+    border-style: solid;
+    border-width: 5px;
+    width: 600px;
+    border-radius: 25px;
+    padding: 15px;
+}
+
+#algor-controls {
+    position: relative;
+    width: 600px;
+}
+
+#algor_choose {
+    position: relative;
+    width: 600px;
+    height: 200px;
+}
+
+#algor-radio {
+    position: absolute;
     width: 300px;
+    top: 0;
+    left: 0;
+}
+
+#algor_desc {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    text-indent: 25px;
+    font-size: 14px;
+}
+
+#options-controls {
+    width: 100%;
 }
 
 #options-controls .form-control {
