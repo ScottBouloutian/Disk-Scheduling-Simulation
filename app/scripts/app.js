@@ -2,9 +2,11 @@ require('scripts/components/*');
 require('scripts/scenes/*');
 
 require('scripts/game');
+require('scripts/algorithm');
 
 Crafty.debugBar.show();
 
+// The descriptions of the algorithms to use on the ui
 var algorDesc = [
     'The first come first serve scheduling algorithm is the most intuitive one. Requests are serviced in the order in which they arrive. While this approach is fair in terms of not leading to starvation, it is the least optimal requiring the most track movements.',
     'The shortest seek time first algorithm services requests by accepting the track closest to where the head is currently located. While this appraoch requires fewer head movements than FCFS, it may lead to starvation.',
@@ -14,6 +16,7 @@ var algorDesc = [
     'The C-LOOK algorithm initially seeks towards the closest end of teh disk. When the last request in this direction is serviced, the disk head jumps to the furthest track in need of attention. All remaining requests are then serviced by scanning in the same initial direction.',
 ];
 
+// When the document is ready
 $(document).ready(function() {
     createRadios();
     Game.start();
@@ -24,6 +27,12 @@ $(document).ready(function() {
     // Set the initial content of the algorithm descriptor
     algorDescElem.text(algorDesc[0]);
 
+    // Fetch the required elements from the DOM
+    var ui = {
+        running_sim: $('.animation_only'),
+        headMovements: $('#total-text')
+    }
+
     // Run simulation button click
     $('#run_sim-btn').click(function() {
         console.log('clicked');
@@ -32,7 +41,7 @@ $(document).ready(function() {
         $('html, body').animate({
             scrollTop: $(document).height()
         }, 'slow');
-        runSimulation();
+        runSimulation(ui);
     });
 
     // Algorithm selection hover event
@@ -51,6 +60,7 @@ $(document).ready(function() {
             algorDescElem.text(algorDesc[algorNum]);
         }
     });
+
 
 });
 
@@ -72,9 +82,7 @@ function createRadios() {
     });
 }
 
-function runSimulation() {
-    // Start rotating the disk
-    Game.startDiskRotation();
+function runSimulation(ui) {
 
     // Retrieve and parse the initial track text
     var initialTrack = parseInt($('#init_track-text').val());
@@ -105,22 +113,22 @@ function runSimulation() {
     var result;
     switch(algorNum) {
         case 0:
-            result = fcfs(queue);
+            result = Algorithm.fcfs(queue);
             break;
         case 1:
-            result = sstf(queue, initialTrack);
+            result = Algorithm.sstf(queue, initialTrack);
             break;
         case 2:
-            result = scan(queue, initialTrack, tailTrack);
+            result = Algorithm.scan(queue, initialTrack, tailTrack);
             break;
         case 3:
-            result = cscan(queue, initialTrack, tailTrack);
+            result = Algorithm.cscan(queue, initialTrack, tailTrack);
             break;
         case 4:
-            result = look(queue, initialTrack, tailTrack);
+            result = Algorithm.look(queue, initialTrack, tailTrack);
             break;
         case 5:
-            result = clook(queue, initialTrack, tailTrack);
+            result = Algorithm.clook(queue, initialTrack, tailTrack);
             break;
         default:
             console.log('problem selecting an algorithm');
@@ -130,13 +138,24 @@ function runSimulation() {
     // Stringify and display the results
     $('#results-controls textarea').val(result);
 
-    // Run a simulation of the results
-    simulate(result, initialTrack, tailTrack, function() {
+    // Retrieve the animation checkbox value
+    var useAnimations = $('#anim-check').prop('checked');
+    if(useAnimations) {
+        ui.running_sim.css('visibility', 'visible');
+        // Start rotating the disk
+        Game.startDiskRotation();
 
-        // Stop disk rotation
-        Game.stopDiskRotation();
+        // Run a simulation of the results
+        simulate(result, initialTrack, tailTrack, function() {
 
-    });
+            // Stop disk rotation
+            Game.stopDiskRotation();
+
+        });
+    } else {
+        ui.running_sim.css('visibility', 'hidden');
+        ui.headMovements.text('0');
+    }
 
 }
 
@@ -153,139 +172,6 @@ function parseQueueText(tailTrack) {
         }
     }
     return queue;
-}
-
-// First Come-First Serve
-function fcfs(queue) {
-    var result = [];
-    while(queue.length > 0) {
-        var t = queue.shift();
-        result.push(t);
-    }
-    return result;
-}
-
-// Shortest Seek Time First
-function sstf(queue, initialTrack) {
-    var result = [];
-    var currentTrack = initialTrack;
-    while(queue.length > 0) {
-        var min = closestTrack(queue, initialTrack, 0);
-        queue.splice(min.index,1);
-        result.push(min.track);
-        currentTrack = min.track;
-    }
-    return result;
-}
-
-// Elevator
-function scan(queue, initialTrack, tailTrack) {
-    var result = [];
-    var scanDirection = 1;
-    if(initialTrack < tailTrack/2) {
-        scanDirection = -1;
-    }
-    var currentTrack = initialTrack;
-    while(queue.length > 0) {
-        var min = closestTrack(queue, currentTrack, scanDirection);
-        if(min.track === -1) {
-            if(scanDirection === 1) {
-                result.push('seek');
-                result.push(tailTrack);
-                currentTrack = tailTrack;
-            } else {
-                result.push('seek');
-                result.push(0);
-                currentTrack = 0;
-            }
-            scanDirection *= -1;
-        } else {
-            queue.splice(min.index,1);
-            result.push(min.track);
-            currentTrack = min.track;
-        }
-    }
-    return result;
-}
-
-// Circular SCAN
-function cscan(queue, initialTrack, tailTrack) {
-    var result = [];
-    var scanDirection = 1;
-    if(initialTrack < tailTrack/2) {
-        scanDirection = -1;
-    }
-    var currentTrack = initialTrack;
-    while(queue.length > 0) {
-        var min = closestTrack(queue, currentTrack, scanDirection);
-        if(min.track === -1) {
-            if(scanDirection === 1) {
-                result.push('seek');
-                result.push(tailTrack);
-                result.push('jump');
-                result.push(0);
-                currentTrack = 0;
-            } else {
-                result.push('seek');
-                result.push(0);
-                result.push('jump');
-                result.push(tailTrack);
-                currentTrack = tailTrack;
-            }
-        } else {
-            queue.splice(min.index,1);
-            result.push(min.track);
-            currentTrack = min.track;
-        }
-    }
-    return result;
-}
-
-// LOOK
-function look(queue, initialTrack, tailTrack) {
-    var result = [];
-    var scanDirection = 1;
-    if(initialTrack < tailTrack/2) {
-        scanDirection = -1;
-    }
-    var currentTrack = initialTrack;
-    while(queue.length > 0) {
-        var min = closestTrack(queue, currentTrack, scanDirection);
-        if(min.track === -1) {
-            scanDirection *= -1;
-        } else {
-            queue.splice(min.index,1);
-            result.push(min.track);
-            currentTrack = min.track;
-        }
-    }
-    return result;
-}
-
-// C-LOOK
-function clook(queue, initialTrack, tailTrack) {
-    var result = [];
-    var scanDirection = 1;
-    if(initialTrack < tailTrack/2) {
-        scanDirection = -1;
-    }
-    var currentTrack = initialTrack;
-    while(queue.length > 0) {
-        var min = closestTrack(queue, currentTrack, scanDirection);
-        if(min.track === -1) {
-            result.push('jump');
-            if(scanDirection === 1) {
-                currentTrack = 0;
-            } else {
-                currentTrack = tailTrack;
-            }
-        } else {
-            queue.splice(min.index,1);
-            result.push(min.track);
-            currentTrack = min.track;
-        }
-    }
-    return result;
 }
 
 // Returns the closest element in the queue to the given track.
@@ -306,7 +192,7 @@ function closestTrack(queue, track, direction) {
         } else {
             dist = direction * (queue[i] - track);
         }
-        if(dist > 0 && dist < min.dist) {
+        if(dist > -1 && dist < min.dist) {
             min.track = queue[i];
             min.index = i;
             min.dist = dist;

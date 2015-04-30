@@ -57,6 +57,14 @@
                 <input id="init_track-text" type="text" placeholder="50" class="form-control" value="50"></input>
                 Tail Track:
                 <input id="tail_track-text" type="text" placeholder="199" class="form-control" value="199"></input>
+                Animations:
+                <label class="checkbox">
+                    <input type="checkbox" value="" id="anim-check" data-toggle="checkbox" class="custom-checkbox">
+                    <span class="icons">
+                        <span class="icon-unchecked"></span>
+                        <span class="icon-checked"></span>
+                    </span>
+                </label>
             </div>
             <button id="run_sim-btn" class="btn btn-hg btn-primary">Run Simulation</button>
         </div>
@@ -65,11 +73,13 @@
             <textarea id="results-text" rows="5" cols="50" placeholder="Running..." class="form-control"></textarea>
             <div id="running_sim">
                 <div id="output_stats">
-                    <p id="current-text">Current Track:</p>
-                    <p id="next-text">Next Track:</p>
                     <p id="total-text">Head Movements:</p>
                 </div>
-                <div id=game></div>
+                <div class="animation_only">
+                    <div id=game></div>
+                    <p id="current-text">Current Track:</p>
+                    <p id="next-text">Next Track:</p>
+                </div>
             </div>
         </div>
     </div>
