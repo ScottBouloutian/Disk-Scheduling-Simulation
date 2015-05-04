@@ -6,12 +6,13 @@ html, body {
 #simulator {
     position: relative;
     height: 1000px;
-    width: 300px;
+    width: 600px;
     margin-left: 30px;
 }
 
 .input_segment {
     width: 600px;
+    margin-bottom: 10px;
 }
 
 #queue-controls textarea{
@@ -34,7 +35,7 @@ html, body {
 #algor_choose {
     position: relative;
     width: 600px;
-    height: 200px;
+    height: 185px;
 }
 
 #algor-radio {
@@ -54,12 +55,23 @@ html, body {
 }
 
 #options-controls {
+    position: relative;
     width: 100%;
+    font-size: 15px;
 }
 
 #options-controls .form-control {
     width: 30px;
-    height: 20px;
+    height: 12px;
+}
+
+#options-controls .option {
+    width: 200px;
+    float: left;
+}
+
+#queue_size {
+    visibility: hidden;
 }
 
 #results-controls {

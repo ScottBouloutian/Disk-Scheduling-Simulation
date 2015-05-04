@@ -16,22 +16,77 @@ var algorDesc = [
     'The C-LOOK algorithm initially seeks towards the closest end of teh disk. When the last request in this direction is serviced, the disk head jumps to the furthest track in need of attention. All remaining requests are then serviced by scanning in the same initial direction.',
 ];
 
+// Variable to determine if the disk queue should be randomized
+var randomizeQueue = false;
+
+// This functions updates the statistics pane in the UI
+// The given statistics are displayed and formatted
+function updateStats(ui, stats) {
+    ui.headMovements.text('Track Movement: ' + stats.trackMovement);
+}
+
+// This function calculates statistics about the result
+function calculateStats(queue, initialTrack, maxTrack) {
+    var result = {
+        trackMovement: 0
+    }
+    var currentHeadPosition = initialTrack;
+    for(var index = 0;index<queue.length;index++) {
+        var current = queue[index];
+        var next;
+        if(index===queue.length - 1) {
+            next = 'none';
+        } else {
+            next = queue[index+1];
+        }
+        if(isNaN(current)) {
+            switch(current) {
+                case 'seek':
+                    break;
+                case 'jump':
+                    // Discount a jump as a head movement
+                    result.trackMovement -= Math.abs(currentHeadPosition - next) % maxTrack;
+                    break;
+                default:
+                    console.log('error has occurred');
+            }
+        } else {
+            result.trackMovement += Math.abs(currentHeadPosition - current) % maxTrack;
+            currentHeadPosition = current;
+        }
+    }
+    return result;
+}
+
 // When the document is ready
 $(document).ready(function() {
     createRadios();
     Game.start();
 
-    // Algorithm description element
-    var algorDescElem = $('p#algor_desc');
-
-    // Set the initial content of the algorithm descriptor
-    algorDescElem.text(algorDesc[0]);
-
     // Fetch the required elements from the DOM
     var ui = {
         running_sim: $('.animation_only'),
-        headMovements: $('#total-text')
+        headMovements: $('#total-text'),
+        algorDesc: $('p#algor_desc'),
+        queue_size: $('#queue_size'),
+        queue_text: $('#queue-text'),
+        queue_size_text: $('#queue_size-text')
     }
+
+    // Set the initial content of the algorithm descriptor
+    ui.algorDesc.text(algorDesc[0]);
+
+    // Handle changes to the randomize queue checkbox
+    $('#random-check:checkbox').on('change.radiocheck', function() {
+        randomizeQueue = !randomizeQueue;
+        if(randomizeQueue) {
+            ui.queue_size.css('visibility', 'visible');
+            ui.queue_text.prop('disabled', true);
+        } else {
+            ui.queue_size.css('visibility', 'hidden');
+            ui.queue_text.prop('disabled', false);
+        }
+    });
 
     // Run simulation button click
     $('#run_sim-btn').click(function() {
@@ -50,18 +105,16 @@ $(document).ready(function() {
         if(isNaN(value)) {
             console.log('error getting radio value');
         } else {
-            algorDescElem.text(algorDesc[value]);
+            ui.algorDesc.text(algorDesc[value]);
         }
     }, function() {
         var algorNum = parseInt($(':radio:checked').val());
         if(isNaN(algorNum)) {
             console.log('error finding checked radio');
         } else {
-            algorDescElem.text(algorDesc[algorNum]);
+            ui.algorDesc.text(algorDesc[algorNum]);
         }
     });
-
-
 });
 
 function createRadios() {
@@ -82,6 +135,7 @@ function createRadios() {
     });
 }
 
+// This function runs the simulation, called when the button is clicked
 function runSimulation(ui) {
 
     // Retrieve and parse the initial track text
@@ -98,13 +152,29 @@ function runSimulation(ui) {
         return;
     }
 
-    // Retrieve and parse the queue text
-    var queue = parseQueueText();
-    if(queue.length > 0) {
-        console.log(queue);
+    // Acquire a disk queue to be simulated
+    var queue;
+    if(randomizeQueue) {
+        var queueSize = parseInt(ui.queue_size_text.val());
+        if(isNaN(queueSize) || queueSize < 2 || queueSize > 5000) {
+            console.log('invalid queue size');
+            return;
+        }
+        queue = [];
+        for(var i=0;i<queueSize;i++) {
+            var random = randomInt(0, tailTrack+1)
+            queue.push(random);
+        }
+        ui.queue_text.val(queue);
     } else {
-        console.log('queue text could not be parsed');
-        return;
+        // Retrieve and parse the queue text
+        queue = parseQueueText(ui.queue_text.val(), tailTrack);
+        if(queue.length > 0) {
+            console.log(queue);
+        } else {
+            console.log('queue text could not be parsed');
+            return;
+        }
     }
 
     // Retrieve and parse the algorithm to use
@@ -135,7 +205,7 @@ function runSimulation(ui) {
             return;
     }
 
-    // Stringify and display the results
+    // Display the results
     $('#results-controls textarea').val(result);
 
     // Retrieve the animation checkbox value
@@ -154,13 +224,12 @@ function runSimulation(ui) {
         });
     } else {
         ui.running_sim.css('visibility', 'hidden');
-        ui.headMovements.text('0');
+        updateStats(ui, calculateStats(result, initialTrack, tailTrack));
     }
 
 }
 
-function parseQueueText(tailTrack) {
-    var text = $('#queue-controls textarea').val();
+function parseQueueText(text, tailTrack) {
     var queueStrings = text.split(',');
     var queue = [];
     for(var i=0;i<queueStrings.length;i++) {
@@ -172,33 +241,6 @@ function parseQueueText(tailTrack) {
         }
     }
     return queue;
-}
-
-// Returns the closest element in the queue to the given track.
-// Elements in the queue are only looked at in a certain sequential direction from the given track.
-// -1 -> left scan direction
-// 0 -> any scan direction
-// 1 -> right scan direction
-function closestTrack(queue, track, direction) {
-    var min = {
-        track: -1,
-        index: -1,
-        dist: Number.MAX_VALUE
-    }
-    for(var i=0;i<queue.length;i++) {
-        var dist;
-        if (direction === 0) {
-            dist = Math.abs(queue[i] - track);
-        } else {
-            dist = direction * (queue[i] - track);
-        }
-        if(dist > -1 && dist < min.dist) {
-            min.track = queue[i];
-            min.index = i;
-            min.dist = dist;
-        }
-    }
-    return min;
 }
 
 function simulate(trackNumbers, initialTrack, maxTrack, callback) {
@@ -248,4 +290,9 @@ function simulate(trackNumbers, initialTrack, maxTrack, callback) {
             callback();
         }
     }, time);
+}
+
+// Generates a random integer between low (inclusive) and high (exclusive)
+function randomInt (low, high) {
+    return Math.floor(Math.random() * (high - low) + low);
 }

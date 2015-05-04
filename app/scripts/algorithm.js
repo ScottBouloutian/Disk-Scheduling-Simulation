@@ -1,5 +1,32 @@
 'use strict';
 
+// Returns the closest element in the queue to the given track.
+// Elements in the queue are only looked at in a certain sequential direction from the given track.
+// -1 -> left scan direction
+// 0 -> any scan direction
+// 1 -> right scan direction
+function closestTrack(queue, track, direction) {
+    var min = {
+        track: -1,
+        index: -1,
+        dist: Number.MAX_VALUE
+    }
+    for(var i=0;i<queue.length;i++) {
+        var dist;
+        if (direction === 0) {
+            dist = Math.abs(queue[i] - track);
+        } else {
+            dist = direction * (queue[i] - track);
+        }
+        if(dist > -1 && dist < min.dist) {
+            min.track = queue[i];
+            min.index = i;
+            min.dist = dist;
+        }
+    }
+    return min;
+}
+
 window.Algorithm = {
     // First Come-First Serve
     fcfs: function(queue) {
