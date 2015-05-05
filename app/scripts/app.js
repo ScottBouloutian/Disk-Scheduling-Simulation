@@ -23,21 +23,26 @@ var randomizeQueue = false;
 // The given statistics are displayed and formatted
 function updateStats(ui, stats) {
     ui.headMovements.text('Track Movement: ' + stats.trackMovement);
+    ui.averageTime.text('Average Wait Time: ' + Math.round(stats.averageWait));
 }
 
 // This function calculates statistics about the result
-function calculateStats(queue, initialTrack, maxTrack) {
+function calculateStats(initialQueue, resultQueue, initialTrack, maxTrack) {
     var result = {
-        trackMovement: 0
-    }
+        trackMovement: 0,
+        averageWait: 0
+    };
+
+    // Calculate the statistics
     var currentHeadPosition = initialTrack;
-    for(var index = 0;index<queue.length;index++) {
-        var current = queue[index];
+    var time = 0;
+    for(var index = 0;index<resultQueue.length;index++) {
+        var current = resultQueue[index];
         var next;
-        if(index===queue.length - 1) {
+        if(index===resultQueue.length - 1) {
             next = 'none';
         } else {
-            next = queue[index+1];
+            next = resultQueue[index+1];
         }
         if(isNaN(current)) {
             switch(current) {
@@ -51,10 +56,14 @@ function calculateStats(queue, initialTrack, maxTrack) {
                     console.log('error has occurred');
             }
         } else {
-            result.trackMovement += Math.abs(currentHeadPosition - current) % maxTrack;
+            var movement = Math.abs(currentHeadPosition - current) % maxTrack;
+            result.trackMovement += movement;
+            time += movement;
+            result.averageWait += time;
             currentHeadPosition = current;
         }
     }
+    result.averageWait /= resultQueue.length;
     return result;
 }
 
@@ -67,6 +76,7 @@ $(document).ready(function() {
     var ui = {
         running_sim: $('.animation_only'),
         headMovements: $('#total-text'),
+        averageTime: $('#average-text'),
         algorDesc: $('p#algor_desc'),
         queue_size: $('#queue_size'),
         queue_text: $('#queue-text'),
@@ -90,7 +100,6 @@ $(document).ready(function() {
 
     // Run simulation button click
     $('#run_sim-btn').click(function() {
-        console.log('clicked');
         $('#simulator').css('height', '1500px');
         $('#results-controls').css('visibility', 'visible');
         $('html, body').animate({
@@ -169,9 +178,7 @@ function runSimulation(ui) {
     } else {
         // Retrieve and parse the queue text
         queue = parseQueueText(ui.queue_text.val(), tailTrack);
-        if(queue.length > 0) {
-            console.log(queue);
-        } else {
+        if(queue.length <= 0) {
             console.log('queue text could not be parsed');
             return;
         }
@@ -183,22 +190,22 @@ function runSimulation(ui) {
     var result;
     switch(algorNum) {
         case 0:
-            result = Algorithm.fcfs(queue);
+            result = Algorithm.fcfs(queue.slice());
             break;
         case 1:
-            result = Algorithm.sstf(queue, initialTrack);
+            result = Algorithm.sstf(queue.slice(), initialTrack);
             break;
         case 2:
-            result = Algorithm.scan(queue, initialTrack, tailTrack);
+            result = Algorithm.scan(queue.slice(), initialTrack, tailTrack);
             break;
         case 3:
-            result = Algorithm.cscan(queue, initialTrack, tailTrack);
+            result = Algorithm.cscan(queue.slice(), initialTrack, tailTrack);
             break;
         case 4:
-            result = Algorithm.look(queue, initialTrack, tailTrack);
+            result = Algorithm.look(queue.slice(), initialTrack, tailTrack);
             break;
         case 5:
-            result = Algorithm.clook(queue, initialTrack, tailTrack);
+            result = Algorithm.clook(queue.slice(), initialTrack, tailTrack);
             break;
         default:
             console.log('problem selecting an algorithm');
@@ -224,7 +231,8 @@ function runSimulation(ui) {
         });
     } else {
         ui.running_sim.css('visibility', 'hidden');
-        updateStats(ui, calculateStats(result, initialTrack, tailTrack));
+        var stats = calculateStats(queue, result, initialTrack, tailTrack);
+        updateStats(ui, stats);
     }
 
 }
@@ -248,11 +256,15 @@ function simulate(trackNumbers, initialTrack, maxTrack, callback) {
     var currentTrackText = $('#current-text');
     var nextTrackText = $('#next-text');
     var headMovementsText = $('#total-text');
+    var averageWaitText = $('#average-text');
 
     var currentHeadPosition = initialTrack;
     var headMovements = 0;
+    var averageWait = 0;
+    var time = 0;
     var index = 0;
-    var time = 500;
+    var animTime = 500;
+    var n = 0;
     var interval = setInterval(function() {
         var current = trackNumbers[index];
         var next;
@@ -273,23 +285,28 @@ function simulate(trackNumbers, initialTrack, maxTrack, callback) {
                     console.log('error has occurred');
             }
         } else {
-            headMovements = headMovements + Math.abs(currentHeadPosition - current) % maxTrack;
+            var movement = Math.abs(currentHeadPosition - current) % maxTrack;
+            headMovements = headMovements + movement;
             currentHeadPosition = current;
+            time += movement;
+            averageWait += time;
+            n++;
 
             // Update the user interface
             currentTrackText.text('Current Track: ' + current);
             nextTrackText.text('Next Track: ' + next);
             headMovementsText.text('HeadMovements: ' + headMovements);
+            averageWaitText.text('Average Wait Time: ' + Math.round(averageWait/n));
 
             // Move the disk arm
-            Game.moveArm(current, maxTrack, time/2);
+            Game.moveArm(current, maxTrack, animTime/2);
         }
         index++;
         if(index === trackNumbers.length) {
             clearInterval(interval);
             callback();
         }
-    }, time);
+    }, animTime);
 }
 
 // Generates a random integer between low (inclusive) and high (exclusive)

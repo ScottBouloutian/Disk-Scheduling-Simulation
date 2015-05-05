@@ -138,10 +138,8 @@ window.Algorithm = {
             scanDirection = -1;
         }
         var currentTrack = initialTrack;
-        console.log(queue);
         while (queue.length > 0) {
             var min = closestTrack(queue, currentTrack, scanDirection);
-            console.log(min);
             if (min.track === -1) {
                 result.push('jump');
                 if (scanDirection === 1) {
