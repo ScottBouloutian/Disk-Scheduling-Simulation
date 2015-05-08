@@ -18,7 +18,7 @@ Run `grunt dist` to create a distribution-ready version of the app. This is what
 
 ## Using this Fantastic App
 
-![Alt text](/blob/master/ui.png?raw=true "Screenshot")
+![alt tag](https://github.com/ScottBouloutian/Disk-Scheduling-Simulation/blob/master/ui.png?raw=true)
 
 **Disk Queue** - The disk queue is the current queue of tracks that need to be visited on the disk. These values must be in the range of *zero* to *tail track* inclusive.
 
