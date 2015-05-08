@@ -14,7 +14,7 @@ npm install
 
 Run `grunt serve` to launch the app in a browser.
 
-Run `grunt dist` to create a distribution-ready version of the app. This is what would be used if you wanted to launch this app as a website.
+Run `grunt build` to create a distribution-ready version of the app. This is what would be used if you wanted to launch this app as a website.
 
 ## Using this Fantastic App
 
